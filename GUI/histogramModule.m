@@ -1,0 +1,43 @@
+function histogramModule(parentWindow)
+    parentWindow.Visible = 'off';
+    histogramWindow = uifigure('Name', '直方图处理', 'WindowStyle', 'normal', 'Position', [100, 100, 800, 400]);
+    axImage = uiaxes(histogramWindow, ...
+        'Position', [50, 100, 300, 250], ...
+        'XTick', [], 'YTick', [], ...
+        'Box', 'on');
+    axImage.Title.String = '原始图像';
+    axHistogram = uiaxes(histogramWindow, ...
+        'Position', [400, 100, 300, 250], ...
+        'XTick', [], 'YTick', [], ...
+        'Box', 'on');
+    axHistogram.Title.String = '灰度直方图';
+    uploadBtn = uibutton(histogramWindow, ...
+        'Text', '上传图片', ...
+        'Position', [50, 350, 120, 30], ...
+        'ButtonPushedFcn', @(btn, event) uploadAndShowImageAndHistogram(axImage, axHistogram));
+    backButton = uibutton(histogramWindow, ...
+        'Text', '返回', ...
+        'Position', [200, 350, 120, 30], ...
+        'ButtonPushedFcn', @(btn, event) goBack(parentWindow, histogramWindow));
+end
+function uploadAndShowImageAndHistogram(axImage, axHistogram)
+    [file, path] = uigetfile({'*.jpg;*.png;*.bmp', '图像文件 (*.jpg, *.png, *.bmp)'; '*.*', '所有文件 (*.*)'}, ...
+                             '选择一张图片');
+    if isequal(file, 0)
+        return;
+    end
+    img = imread(fullfile(path, file));
+    imshow(img, 'Parent', axImage);
+    axImage.Title.String = '原始图像';
+    if size(img, 3) == 3
+        img = rgb2gray(img);
+    end
+    histogram(axHistogram, img(:), 'BinEdges', 0:256, 'FaceColor', 'k');
+    axHistogram.Title.String = '灰度直方图';
+    axHistogram.XLabel.String = '灰度级';
+    axHistogram.YLabel.String = '像素数';
+end
+function goBack(parentWindow, currentWindow)
+    delete(currentWindow);
+    parentWindow.Visible = 'on';
+end
