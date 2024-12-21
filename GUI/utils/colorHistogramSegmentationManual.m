@@ -1,7 +1,11 @@
-function binaryImg = colorHistogramSegmentationManual(img, targetRange)
+function binaryImg = colorHistogramSegmentationManual(img, targetRange, savePath)
     hsvImg = rgb2hsvManual(img);
     hChannel = hsvImg(:, :, 1);
     binaryImg = (hChannel >= targetRange(1)) & (hChannel <= targetRange(2));
+    if nargin > 2 && ~isempty(savePath)
+        imwrite(binaryImg, savePath);
+        disp(['目标区域保存至：' savePath]);
+    end
 end
 function hsvImg = rgb2hsvManual(img)
     img = double(img) / 255;

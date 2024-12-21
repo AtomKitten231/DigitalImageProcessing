@@ -5,6 +5,7 @@ function binaryImg = thresholdSegmentationManual(img, savePath)
     totalPixels = rows * cols;
     currentMax = 0;
     threshold = 0;
+    
     for t = 1:256
         w0 = sum(histogram(1:t)) / totalPixels;
         w1 = sum(histogram(t+1:end)) / totalPixels;
@@ -23,7 +24,10 @@ function binaryImg = thresholdSegmentationManual(img, savePath)
             threshold = t - 1;
         end
     end
+    
     binaryImg = grayImg > threshold;
+    
+    % 保存图像到指定路径
     if nargin > 1 && ~isempty(savePath)
         imwrite(binaryImg, savePath);
         disp(['目标区域保存至：' savePath]);

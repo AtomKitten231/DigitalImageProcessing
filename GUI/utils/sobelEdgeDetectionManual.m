@@ -1,11 +1,15 @@
-function edgeImg = sobelEdgeDetectionManual(img)
+function edgeImg = sobelEdgeDetectionManual(img, savePath)
     grayImg = rgb2grayManual(img);
     sobelX = [-1 0 1; -2 0 2; -1 0 1];
     sobelY = [-1 -2 -1; 0 0 0; 1 2 1];
     edgeX = conv2Manual(double(grayImg), sobelX);
     edgeY = conv2Manual(double(grayImg), sobelY);
     edgeImg = sqrt(edgeX.^2 + edgeY.^2);
-    edgeImg = mat2gray(edgeImg); % 归一化
+    edgeImg = mat2gray(edgeImg);
+    if nargin > 1 && ~isempty(savePath)
+        imwrite(edgeImg, savePath);
+        disp(['目标区域保存至：' savePath]);
+    end
 end
 function result = conv2Manual(img, kernel)
     [rows, cols] = size(img);

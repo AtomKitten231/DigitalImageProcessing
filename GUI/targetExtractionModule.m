@@ -16,15 +16,15 @@ function targetExtractionModule(parentWindow)
     uibutton(targetWindow, ...
         'Text', '阈值分割', ...
         'Position', [200, 50, 120, 30], ...
-        'ButtonPushedFcn', @(btn, event) thresholdSegmentation(axOriginal, axResult));
+        'ButtonPushedFcn', @(btn, event) extractThresholdTarget(axOriginal, axResult));
     uibutton(targetWindow, ...
         'Text', '边缘检测 (Sobel)', ...
         'Position', [350, 50, 120, 30], ...
-        'ButtonPushedFcn', @(btn, event) sobelEdgeDetection(axOriginal, axResult));
+        'ButtonPushedFcn', @(btn, event) extractSobelTarget(axOriginal, axResult));
     uibutton(targetWindow, ...
         'Text', '颜色直方图分离', ...
         'Position', [500, 50, 150, 30], ...
-        'ButtonPushedFcn', @(btn, event) colorHistogramSegmentation(axOriginal, axResult));
+        'ButtonPushedFcn', @(btn, event) extractColorTarget(axOriginal, axResult));
     uibutton(targetWindow, ...
         'Text', '返回', ...
         'Position', [700, 50, 120, 30], ...
@@ -40,36 +40,51 @@ function uploadImage(axOriginal)
     axOriginal.Title.String = '原图';
     axOriginal.UserData = img;
 end
-function thresholdSegmentation(axOriginal, axResult)
+function extractThresholdTarget(axOriginal, axResult)
     if isempty(axOriginal.UserData)
         uialert(axOriginal.Parent, '请先上传图片！', '错误');
         return;
     end
     img = axOriginal.UserData;
-    binaryImg = thresholdSegmentationManual(img);
+    saveDir = 'D:\Files\ProgramProject\MatLab\FinalWork\results\';
+    if ~exist(saveDir, 'dir')
+        mkdir(saveDir);
+    end
+    binaryImg = thresholdSegmentationManual(img, fullfile(saveDir, 'threshold_result.png'));
     imshow(binaryImg, 'Parent', axResult);
     axResult.Title.String = '阈值分割结果';
+    axResult.UserData = binaryImg;
 end
-function sobelEdgeDetection(axOriginal, axResult)
+function extractSobelTarget(axOriginal, axResult)
     if isempty(axOriginal.UserData)
         uialert(axOriginal.Parent, '请先上传图片！', '错误');
         return;
     end
     img = axOriginal.UserData;
-    edgeImg = sobelEdgeDetectionManual(img);
+    saveDir = 'D:\Files\ProgramProject\MatLab\FinalWork\results\';
+    if ~exist(saveDir, 'dir')
+        mkdir(saveDir);
+    end
+    edgeImg = sobelEdgeDetectionManual(img, fullfile(saveDir, 'sobel_result.png'));
     imshow(edgeImg, 'Parent', axResult);
     axResult.Title.String = '边缘检测 (Sobel) 结果';
+    axResult.UserData = edgeImg;
 end
-function colorHistogramSegmentation(axOriginal, axResult)
+function extractColorTarget(axOriginal, axResult)
     if isempty(axOriginal.UserData)
         uialert(axOriginal.Parent, '请先上传图片！', '错误');
         return;
     end
     img = axOriginal.UserData;
+    saveDir = 'D:\Files\ProgramProject\MatLab\FinalWork\results\';
+    if ~exist(saveDir, 'dir')
+        mkdir(saveDir);
+    end
     targetRange = [0.2, 0.4];
-    binaryImg = colorHistogramSegmentationManual(img, targetRange);
+    binaryImg = colorHistogramSegmentationManual(img, targetRange, fullfile(saveDir, 'color_result.png'));
     imshow(binaryImg, 'Parent', axResult);
     axResult.Title.String = '颜色直方图分离结果';
+    axResult.UserData = binaryImg;
 end
 function goBack(parentWindow, currentWindow)
     delete(currentWindow);
