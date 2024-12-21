@@ -50,12 +50,14 @@ function uploadAndShowImageAndHistogram(axImage, axHistogram)
 end
 
 function equalizeHistogram(axImage, axHistogram)
+    addpath('D:\Files\ProgramProject\MatLab\FinalWork\GUI\utils');
     if isempty(axImage.UserData) || isempty(axHistogram.UserData)
         uialert(axImage.Parent, '请先上传图片！', '错误');
         return;
     end
+    
     img = axHistogram.UserData;
-    equalizedImg = histeq(img);
+    equalizedImg = histogramEqualization(img);
     equalizedWindow = uifigure('Name', '直方图均衡化', 'WindowStyle', 'normal', 'Position', [100, 100, 800, 500]);
     axOriginalImage = uiaxes(equalizedWindow, ...
         'Position', [50, 250, 300, 200], ...
@@ -83,32 +85,34 @@ function equalizeHistogram(axImage, axHistogram)
     axEqualizedHistogram.Title.String = '均衡化后灰度直方图';
 end
 
+
 function matchHistogram(axImage, axHistogram)
+    addpath('D:\Files\ProgramProject\MatLab\FinalWork\GUI\utils');
     if isempty(axImage.UserData) || isempty(axHistogram.UserData)
         uialert(axImage.Parent, '请先上传图片！', '错误');
         return;
     end
-    img = axHistogram.UserData;
+    srcImg = axHistogram.UserData;
     matchWindow = uifigure('Name', '直方图匹配', 'WindowStyle', 'normal', 'Position', [100, 100, 1200, 500]);
     axOriginalImage = uiaxes(matchWindow, ...
         'Position', [50, 250, 300, 200], ...
         'XTick', [], 'YTick', [], ...
         'Box', 'on');
-    imshow(img, 'Parent', axOriginalImage);
+    imshow(srcImg, 'Parent', axOriginalImage);
     axOriginalImage.Title.String = '原始图像';
     axOriginalHistogram = uiaxes(matchWindow, ...
         'Position', [50, 50, 300, 150], ...
         'XTick', [], 'YTick', [], ...
         'Box', 'on');
-    histogram(axOriginalHistogram, img(:), 'BinEdges', 0:256, 'FaceColor', 'k');
+    histogram(axOriginalHistogram, srcImg(:), 'BinEdges', 0:256, 'FaceColor', 'k');
     axOriginalHistogram.Title.String = '原始灰度直方图';
     uploadTargetBtn = uibutton(matchWindow, ...
         'Text', '上传目标图像', ...
         'Position', [60, 460, 150, 30], ...
-        'ButtonPushedFcn', @(btn, event) uploadTargetImage(img, matchWindow));
+        'ButtonPushedFcn', @(btn, event) uploadTargetImage(srcImg, matchWindow));
 end
 
-function uploadTargetImage(img, matchWindow)
+function uploadTargetImage(srcImg, matchWindow)
     [file, path] = uigetfile({'*.jpg;*.png;*.bmp', '图像文件 (*.jpg, *.png, *.bmp)'; '*.*', '所有文件 (*.*)'}, ...
                              '选择目标图像');
     if isequal(file, 0)
@@ -118,7 +122,7 @@ function uploadTargetImage(img, matchWindow)
     if size(targetImg, 3) == 3
         targetImg = rgb2gray(targetImg);
     end
-    matchedImg = imhistmatch(img, targetImg);
+    matchedImg = histogramMatching(srcImg, targetImg);
     axTargetImage = uiaxes(matchWindow, ...
         'Position', [400, 250, 300, 200], ...
         'XTick', [], 'YTick', [], ...
@@ -144,7 +148,6 @@ function uploadTargetImage(img, matchWindow)
     histogram(axMatchedHistogram, matchedImg(:), 'BinEdges', 0:256, 'FaceColor', 'k');
     axMatchedHistogram.Title.String = '匹配后灰度直方图';
 end
-
 function goBack(parentWindow, currentWindow)
     delete(currentWindow);
     parentWindow.Visible = 'on';
