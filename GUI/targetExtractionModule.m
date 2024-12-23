@@ -109,16 +109,50 @@ function extractColorTarget(axOriginal, axResult)
         return;
     end
     img = axOriginal.UserData;
+
+    % 动态获取颜色范围
+    inputFig = uifigure('Name', '设置颜色直方图范围', 'Position', [500, 400, 300, 200]);
+    uilabel(inputFig, 'Text', '输入颜色范围 (0-1)：', 'Position', [50, 140, 200, 20]);
+    uilabel(inputFig, 'Text', '下限：', 'Position', [50, 100, 50, 20]);
+    uilabel(inputFig, 'Text', '上限：', 'Position', [50, 60, 50, 20]);
+
+    lowerLimitField = uieditfield(inputFig, 'numeric', 'Position', [100, 100, 100, 20], 'Value', 0.2, 'Limits', [0, 1]);
+    upperLimitField = uieditfield(inputFig, 'numeric', 'Position', [100, 60, 100, 20], 'Value', 0.4, 'Limits', [0, 1]);
+
+    uibutton(inputFig, 'Text', '确定', 'Position', [100, 20, 100, 30], ...
+        'ButtonPushedFcn', @(btn, event) processColorSegmentationWithSave(lowerLimitField.Value, upperLimitField.Value, inputFig, img, axResult));
+end
+
+%% 处理颜色分离的逻辑
+% @param lowerLimit 用户输入的下限值
+% @param upperLimit 用户输入的上限值
+% @param inputFig 用户输入范围的窗口句柄
+% @param img 原始图像
+% @param axResult 目标提取结果显示的坐标轴句柄
+function processColorSegmentationWithSave(lowerLimit, upperLimit, inputFig, img, axResult)
+    if lowerLimit >= upperLimit
+        uialert(inputFig, '下限必须小于上限！', '错误');
+        return;
+    end
+    close(inputFig);
+
+    % 定义保存路径
     saveDir = 'D:\Files\ProgramProject\MatLab\FinalWork\results\';
     if ~exist(saveDir, 'dir')
         mkdir(saveDir);
     end
-    targetRange = [0.2, 0.4];
-    binaryImg = colorHistogramSegmentationManual(img, targetRange, fullfile(saveDir, 'color_result.png'));
+
+    % 调用颜色直方图分割逻辑
+    targetRange = [lowerLimit, upperLimit];
+    savePath = fullfile(saveDir, 'color_result.png');
+    binaryImg = colorHistogramSegmentationManual(img, targetRange, savePath);
+
+    % 显示结果
     imshow(binaryImg, 'Parent', axResult);
     axResult.Title.String = '颜色直方图分离结果';
     axResult.UserData = binaryImg;
 end
+
 
 %% 返回函数
 % 该函数关闭当前窗口并恢复父窗口的可见性。
